@@ -26,4 +26,4 @@ Draft for human review, July 2026.
 
 ## License
 
-No license has been specified yet. Until a license is added, default copyright restrictions apply.
+MIT License. See [`LICENSE`](LICENSE).
