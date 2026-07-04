@@ -1,6 +1,6 @@
 ---
 skill_name: plain_spec_governor
-version: 0.1.0
+version: 0.2.0
 status: draft
 summary: >
   Enforces Plain-before-code development for OpenCLAW/OmegaCLAW work by creating or
@@ -31,6 +31,9 @@ non_goals:
   - Do not prove the Plain spec correct.
   - Do not allow the reviewer subagent to write implementation code.
   - Do not create unnecessary ceremony for trivial local changes.
+  - Do not require philosophical commitments for every Plain file.
+  - Do not turn review into broad metaphysical debate.
+  - Do not assert that every implementation detail is a philosophical commitment.
 ---
 
 # Plain Spec Governor Skill
@@ -132,7 +135,8 @@ Minimum spec requirements:
 - invariants;
 - regression tests;
 - migration/compatibility behavior if applicable;
-- explicit future portability concerns where relevant.
+- explicit future portability concerns where relevant;
+- explicit design rationale or philosophical commitments when the change affects memory, permissions, attribution, model routing, persistent state, inter-agent delegation, or oversight.
 
 ### Tier 3 — Long-running research code
 
@@ -157,7 +161,8 @@ Minimum spec requirements:
 - logging/artifact retention;
 - reproducibility information;
 - failure criteria;
-- limits on what conclusions can be drawn.
+- limits on what conclusions can be drawn;
+- explicit design rationale or philosophical commitments when the experiment's representation, evidence records, controls, or substrate choice are part of the research claim.
 
 ## Persistent Subagent: PlainSpecReviewer
 
@@ -183,7 +188,8 @@ The subagent should maintain memory of:
 - known Linux/setup-script hazards;
 - framework/template recommendations;
 - unresolved assumptions from prior reviews;
-- recurring modularity or portability concerns.
+- recurring modularity or portability concerns;
+- recurring philosophical commitments behind OpenClaw/OmegaClAW designs, such as inspectability, provenance, attribution, permission boundaries, live oversight, bounded delegation, and evidence-first research claims.
 
 ### Subagent Initialization Prompt
 
@@ -222,7 +228,8 @@ Review stance:
 - Flag all Critical issues that must block implementation.
 - Flag Research-risk issues that may permit implementation but block strong conclusions.
 - Propose minimal Plain patches rather than large rewrites when possible.
-- Do not ask questions unless the missing answer blocks safe implementation; otherwise state the assumption and propose a spec revision.
+- When a spec concerns Tier 2 or Tier 3 work, identify concealed philosophical commitments that may affect architecture, tests, acceptance gates, or future compatibility.
+- Do not over-philosophize trivial utilities. Propose commitments only when they change what should be built or preserved.
 
 Severity meanings:
 - Critical: must revise before coding.
@@ -289,6 +296,10 @@ Create or update `<task-or-module>.plain`. Include the relevant Plain sections:
 ```plain
 ***definitions***
 
+***design rationale***        # optional; recommended for Tier 2/3 when design intent is easy to lose
+# or
+***philosophical commitments*** # optional equivalent for explicit commitments
+
 ***implementation reqs***
 
 ***test reqs***
@@ -297,6 +308,8 @@ Create or update `<task-or-module>.plain`. Include the relevant Plain sections:
 ```
 
 For each significant functional requirement, nest acceptance tests under the functional spec when possible.
+
+Use the rationale/commitments section only when it constrains implementation or future revision. Do not add abstract commentary that has no acceptance hook, invariant, non-goal, or review consequence.
 
 ### Step 4 — Run local Plain lint
 
@@ -312,6 +325,9 @@ Before asking the reviewer subagent, check mechanically:
 - side effects and external dependencies are explicit;
 - research specs include sanity tests and metrics;
 - ops specs include idempotence and failure behavior.
+- Tier 2/3 specs that affect memory, identity, attribution, permissions, oversight, delegation, cost governance, scientific evidence, or ontology include a `***design rationale***` / `***philosophical commitments***` section, or the review notes explicitly say no material hidden commitment was found;
+- each `:PhilosophicalCommitment:` has at least one practical implication: linked concept, requirement, test, invariant, non-goal, or regression risk;
+- rationale bullets do not contradict functional specs or implementation requirements.
 
 If lint fails, revise the spec before asking the reviewer.
 
@@ -391,6 +407,7 @@ Review policy:
 6. For command-line or setup scripts, check side effects, idempotence, privilege assumptions, files modified, network assumptions, failure handling, and dry-run/rollback needs.
 7. For research scripts, check whether there are synthetic sanity cases, known-answer tests, metric definitions, seed/config/data provenance, and explicit failure criteria.
 8. Prefer conservative assumptions. Do not ask questions unless a missing answer blocks safe implementation; otherwise state the assumption and propose a spec revision.
+9. If the task unexpectedly affects persistent memory, permissions, attribution, user oversight, or scientific evidence, note any hidden design rationale that should be made explicit; otherwise do not add philosophical overhead.
 
 Output exactly in this format:
 
@@ -494,6 +511,10 @@ If this is research code, check:
 PASS 6 — Framework and Modularity Audit
 Check whether the spec should use an existing framework, template, library, or project convention. Identify abstractions that should be explicit interfaces. Flag hardcoded assumptions that would impede future Python/MeTTa/MM2/Hyperon/Atomspace replacement.
 
+PASS 6A — Concealed Philosophy / Design Rationale Audit
+Check whether the spec hides commitments about identity, memory, attribution, permissions, live oversight, agency boundaries, epistemic trust, scientific evidence, interpretability, governance, substrate choice, or ontology.
+For each material commitment, identify where it is implied, how a future implementation could satisfy surface behavior while violating it, and the smallest Plain addition or acceptance hook that should protect it. Do not add abstract commentary unless it changes implementation, tests, architecture, or review gate.
+
 PASS 7 — Verification-Readiness Audit
 Extract candidate:
 - types or concepts;
@@ -527,7 +548,7 @@ A compact summary of whether implementation should proceed and why.
 # Issue Table
 Use this table:
 | ID | Severity | Category | Spec Location | Problem | Consequence | Recommended Change |
-Categories may include: Plain-structure, Ambiguity, Correctness, Research-validity, Ops-safety, Modularity, Framework, Verification, Testing.
+Categories may include: Plain-structure, Ambiguity, Correctness, Research-validity, Ops-safety, Modularity, Framework, Verification, Testing, Philosophical-commitment.
 
 # Plausible Wrong Implementations
 List at least 3 ways a coding agent could implement the wrong thing while still seeming to follow the spec.
@@ -542,6 +563,9 @@ Separate into:
 
 # Candidate Invariants and Formalization Hooks
 List concepts, invariants, preconditions, postconditions, and state transitions that should later be formalized.
+
+# Concealed Commitments and Rationale
+List material hidden commitments, if any. For each: commitment, implied-by, practical consequence, regression risk, and recommended Plain addition. If none, write `None material for this spec`.
 
 # Framework/Template Recommendation
 State whether an existing framework/template should be used. If yes, name it or describe it. If no, explain why not.
@@ -857,7 +881,8 @@ Implementation is blocked if:
 - destructive side effects are underspecified;
 - a research estimator/miner has no known-answer sanity check and the result is intended to support a claim;
 - an agent codebase change can corrupt persistent state without specified recovery or tests;
-- a setup script can overwrite user/system files without backup, confirmation, or explicit justification.
+- a setup script can overwrite user/system files without backup, confirmation, or explicit justification;
+- a Tier 2/3 spec has an unacknowledged philosophical commitment whose omission would likely cause unsafe authority expansion, persistent-state corruption, loss of auditability, invalid research claims, or reversal of an explicit project-level governance boundary.
 
 Research conclusions are blocked if:
 
@@ -866,7 +891,8 @@ Research conclusions are blocked if:
 - synthetic/known-answer tests are absent for novel estimators/miners;
 - nondeterminism is uncontrolled or unreported;
 - artifacts are insufficient for replication;
-- baseline/negative/control cases are missing without justification.
+- baseline/negative/control cases are missing without justification;
+- the spec's evidence-record or substrate commitments are violated, e.g. a claim depends on inspectable/replayable symbolic records but only unstructured summaries are produced.
 
 ## Escalation Policy
 
@@ -925,6 +951,12 @@ Prefer reusing these concept names unless the project has a better established v
 - :InterfaceContract: is the stable input/output behavior exposed by :AgentModule:.
 - :RegressionCase: is a previously supported behavior that must remain supported after this change.
 - :SafetyBoundary: is a rule limiting when :AgentModule: may modify state or trigger :ExternalAction:.
+```
+
+### Rationale/governance concepts
+
+```plain
+- :PhilosophicalCommitment: is an explicit design commitment about ontology, epistemic trust, agency, identity, memory, attribution, permissions, oversight, evidence, interpretability, or governance that materially constrains implementation or future revisions.
 ```
 
 ## Agent Self-Check Before Coding
